@@ -1,0 +1,30 @@
+[
+  {
+    "userID": "elon_musk_0001",
+    "messengerID" : null,
+    "firstname": "Elon",
+    "lastname": "Musk",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "dmit_mend_0001",
+    "messengerID" : null,
+    "firstname": "Dimitri",
+    "lastname": "Medelev",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "gord_rams_0001",
+    "messengerID" : null,
+    "firstname": "Gordon",
+    "lastname": "Ramsay",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "kenn_leon_0001",
+    "messengerID" : null,
+    "firstname": "Keenny",
+    "lastname": "Leone",
+    "school" : "333 Huntington"
+  }
+]

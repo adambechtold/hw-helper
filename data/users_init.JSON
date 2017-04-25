@@ -1,0 +1,71 @@
+[
+  {
+    "userID": "adam_bech_0001",
+    "userTpye" : "student",
+    "messengerID" : "1282653015153168",
+    "firstname": "Adam",
+    "lastname": "Bechtold",
+    "school": "Northeastern University"
+  },
+  {
+    "userID": "emil_obri_0001",
+    "messengerID" : "1677228848968842",
+    "userTpye" : "student",
+    "firstname": "Emily",
+    "lastname": "O'Brien",
+    "school": "Northeastern University"
+  },
+  { "userID": "andr_clou_0001",
+    "messengerID" : null,
+    "userTpye" : "student",
+    "firstname": "Andrew",
+    "lastname": "Cloud",
+    "school": "Northeastern University"
+  },
+  { "userID": "yasm_hash_0001",
+    "messengerID" : null,
+    "userTpye" : "student",
+    "firstname": "Yasmine",
+    "lastname": "Hashemi",
+    "school": "Northeastern University"
+  },
+  { "userID": "kati_whil_0001",
+    "messengerID" : null,
+    "userTpye" : "student",
+    "firstname": "Katie",
+    "lastname": "Wilhoit",
+    "school": "Northeastern University"
+  },
+  {
+    "userID": "elon_musk_0001",
+    "messengerID" : null,
+    "userTpye" : "teacher",
+    "firstname": "Elon",
+    "lastname": "Musk",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "dmit_mend_0001",
+    "messengerID" : null,
+    "userTpye" : "teacher",
+    "firstname": "Dimitri",
+    "lastname": "Medelev",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "gord_rams_0001",
+    "messengerID" : null,
+    "userTpye" : "teacher",
+    "firstname": "Gordon",
+    "lastname": "Ramsay",
+    "school" : "Northeastern University"
+  },
+  {
+    "userID": "kenn_leon_0001",
+    "messengerID" : null,
+    "userTpye" : "teacher",
+    "firstname": "Keenny",
+    "lastname": "Leone",
+    "school" : "333 Huntington"
+  }
+]

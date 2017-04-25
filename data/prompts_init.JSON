@@ -1,0 +1,30 @@
+[
+  {
+    "school" : "Northeastern University",
+    "classID" : "CHEM1101_S1",
+    "description" : "What is your favorite molecule?",
+    "timeAssign" : "2017-03-20T12:00-05:00",
+    "timeDue" : "2017-03-21T24:00-05:00",
+    "reponses" : []
+  },
+  {
+    "school" : "Northeastern University",
+    "classID" : "ENTR7030_S1",
+    "description" : "What part of your project are you working on today?",
+    "timeAssign" : "2017-03-19T12:00-05:00",
+    "timeDue" : "2017-03-20T24:00-05:00",
+      "reponses" : [{
+        "userID" : "kati_whil_0001",
+        "response" : "I ",
+        "timeResponse" : "2017-03-19T13:00-05:00"
+        }]  
+  },
+  {
+    "school" : "Northeastern University",
+    "classID" : "COOK2919_S1",
+    "description" : "Who is sitting next to right now? Find their weakness and exploit it.",
+    "timeAssign" : "2017-03-18T12:00-05:00",
+    "timeDue" : "2017-03-18T24:00-05:00",
+    "responses" : []
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "school" : "Northeastern University",
+    "classID" : "CHEM1101_S1",
+    "timeAssign" : "2017-03-23T12:00-05:00",
+    "timeDue" : "2017-03-30T24:00-05:00",
+    "description" : "Turn a normal rock into a glowing, radioactive rock.",
+    "uploadFile" : null,
+    "externResources" : null
+  },
+  {
+    "school" : "Northeastern University",
+    "classID" : "ENTR7030_S1",
+    "timeAssign" : "2017-03-20T12:00-05:00",
+    "timeDue" : "2017-03-30T24:00-05:00",
+    "description" : "Start a business with your hands tied behind your back.",
+    "uploadFile" : null,
+    "externResources" : null
+  },
+  {
+    "school" : "Northeastern University",
+    "classID" : "COOK2919_S1",
+    "timeAssign" : "2017-03-12T12:00-05:00",
+    "timeDue" : "2017-03-20T24:00-05:00",
+    "description" : "Find your angriest face. Bring it to class for show and tell.",
+    "uploadFile" : null,
+    "externResources" : null
+  },
+  {
+    "school" : "Northeastern University",
+    "classID" : "HAIR2001_S1",
+    "timeAssign" : "2017-03-10T12:00-05:00",
+    "timeDue" : "2017-03-20T24:00-05:00",
+    "description" : "Research the history of nape designs. Bring in your funnest fact.",
+    "uploadFile" : null,
+    "externResources" : null
+  }
+]
