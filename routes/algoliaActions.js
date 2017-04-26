@@ -10,10 +10,12 @@ var algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
 
 
 var search = (queryAttribute, query, table, exactMatch, responseType, defaultValue) => {
+  
   let index = algoClient.initIndex(table);
 
   let promise = new Promise((resolve, reject) => {
-    index.search(query, (err, content) => {
+
+    var algoResponse = index.search(query, (err, content) => {
     //search the database
       if(err) {
         console.error('algolia search error :: search :: algoliaActions.js');
@@ -26,28 +28,32 @@ var search = (queryAttribute, query, table, exactMatch, responseType, defaultVal
         {
           switch(responseType) {
             case 'hits':
-              return content.hits;
+              return (content.hits);
               break;
             case 'single':
-              return content.hits[0];
+              return (content.hits[0]);
               break;
             default:
-              return content;
-
+              return (content);
           }
         } else if (defaultValue) {
           console.log('user not found. Sending default.');
-          return defaultValue;
+          return (defaultValue);
         } else {
           console.log('user not found. no default to return.');
-          return null;
+          throw 'algoliaActions :: search :: no user found. no default to return';
         }
       }
     });
+
+    if(algoResponse) {
+      resolve(algoResponse);
+    } else {
+      reject('algo search error');
+    }
   });
 
   // out result is here to make the promise happy?
-  let outResult = {};
 
   promise.then((result) => {
     console.log('it works');
@@ -57,8 +63,6 @@ var search = (queryAttribute, query, table, exactMatch, responseType, defaultVal
   }, (err) => {
     console.error('it broke...');
   });
-
-  return outResult;
 }
 
 module.exports.search = search;

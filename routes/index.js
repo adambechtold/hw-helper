@@ -12,11 +12,9 @@ var algoliasearch = require('algoliasearch');
 var router = express.Router();
 var defaults = require('../data/defaults');
 
-
 //--------------ALGOLIA PARAMETERS-------------
 const algoliaAppID = process.env.ALGOLIA_APP_ID;
 const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
-
 
 // clients for each table
 var algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
@@ -114,71 +112,49 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    let promise = new Promise((resolve, reject) => {
-      //search the database for the senders name in the context
-      index.search(senderID, (err, content) => {
-        if(err) {
-          console.error('aloglia search error :: getName', err);
-        }
-        else {
-          let hitlist = content.hits;
+    index.search(senderID, (err, content) => {
+      if(err) {
+        // reject promise if error is found
+        console.log('algolia search error');
+        throw err;
+      }
+      else {
+        let hitlist = content.hits && content.hits.length ? content.hits : hitlist;
 
-          if(hitlist && hitlist.length && hitlist[0].messengerID === senderID) 
+        if (!hitlist) {
+          context.userProfile = defaults.defaultUser;
+          context.name = 'alfred';
+          return context;
+        }
+
+        let user = hitlist[0];
+
+        if (user.messengerID === senderID) {
+          console.log('hi+_+_+_+_+_');
           // ensure the the list is not empty and that we have an exact match
-          {
-            console.log('search completed for : ', senderID);
-            let firstname = content.hits[0].firstname;
-            let userID = content.hits[0].userID;
-
-            if(firstname) {
-            console.log('it worked: ' + firstname);
-              resolve(content.hits[0]);
-            } else {
-              console.log('bye');
-              reject(Error('it broke...'));
-            }
-          } else { //hitlist is empty
-              resolve(defaults.defaultUser);
-          }
-        }
-      });
+          context.userProfile = user;
+          context.name = context.userProfile.firstname; 
+          return context;
+        } 
+      }
     });
-
-    console.log('default user: ', defaults.defaultUser);
-
-    // attempt to abstract search user function
-    //   continuing issue: ansynchronous behavior 
 
     // let promise = new Promise((resolve, reject) => {
-    //   console.log('search based on senderID: ', senderId)
-    //   let user = searchUser(senderId);
-
-    //   if(user) {
-    //     resolve({
-    //       name : user.firstname,
-    //       userId : user.userID
-    //     });
-    //   } else {
-    //     console.log('it broke...');
-    //     reject(Error('it broke...'));
-    //   }
+    //   //search the database for the senders name in the context
     // });
 
-    promise.then((result) => {
-      console.log('it works');
-      console.log(result);
-      console.log('in promise');
-      // context.name = result.name;
-      context.userProfile = result;
-      context.name = context.userProfile.firstname;
-      // context.userID = result.userID;
-      console.log('context: ', context);
-      return context;
-    }, (err) => {
-      console.error('it broke...');
-    });
+    // promise.then((user) => {
+    //   context.userProfile = user;
+    //   context.name = context.userProfile.firstname;
+    //   console.log('context: ', context);
+    //   return context;
+    // }).catch((err) => {
+    //   // handle errors from promise
+    //   console.error('it broke...');
+    //   return context;
+    // });
 
-    return context;
+    // return context;
   },
 
   //get hw assignemnts for this student
@@ -189,7 +165,7 @@ const actions = {
 
     // if we have already found the user information in get name
     //    improvement: use searchUser function to find the user if you don't know who they are
-    if(context.userProfile.userID) {
+    if(context.userProfile && context.userProfile.userID) {
       let index = algoClient.initIndex('test_CLASSES');
 
       let promise = new Promise((resolve, reject) => {
