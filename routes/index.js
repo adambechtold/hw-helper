@@ -2,7 +2,7 @@ var express = require('express');
 var request = require('request');
 var algoliasearch = require('algoliasearch');
 var router = express.Router();
-var defaults = require('../data/defaults.js');
+var defaults = require('../data/defaults');
 
 
 //--------------ALGOLIA PARAMETERS-------------
@@ -19,6 +19,7 @@ const witEndpoint = "https://api.wit.ai/message?v=20170424&q=";
 const witAccessToken = process.env.WIT_ACCESS_TOKEN;
 
 //------------FACEBOOK PARAMETERS------------
+var fbActions = require('./fbActions');
 const facebookAccessToken = process.env.TEST_BOT_PAGE_ACCESS_TOKEN;
 
 
@@ -95,7 +96,7 @@ const actions = {
     console.log('current context...', context);
     console.log('sending...', JSON.stringify(response));
 
-    sendTextMessage(recipientId, response.text);
+    fbActions.sendTextMessage(recipientId, response.text);
   },
 
   // get the name of the user from the database based on their sender id
@@ -378,64 +379,14 @@ function searchUser(query) {
 }
 
 
-
-
-// functions to send stuff
-function sendTextMessage(recipientId, messageText) {
-
-  responseBuilder = messageText;
-
-  var messageData = {
-    recipient: {
-      id: recipientId
-    },
-    message: {
-      text: responseBuilder
-    }
-  };
-
-  callSendAPI(messageData);
-}
-
-function callSendAPI(messageData) {
-  request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: facebookAccessToken },
-    method: 'POST',
-    json: messageData
-
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
-
-      // console.log("Successfully sent generic message with id %s to recipient %s",
-      //   messageId, recipientId);
-    } else {
-      //console.error("Unable to send message.");
-      //console.error(response);
-      //console.error(error);
-    }
-  });
-}
-
-
 //webhook token verifier from Facebook
 router.get('/webhook/', function(req, res) {
-  if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === 'token_works') {
-    console.log("Validating webhook");
-    res.status(200).send(req.query['hub.challenge']);
-  } else {
-    console.error("Failed validation. Make sure the validation tokens match.");
-    res.sendStatus(403);
-  }
+  fbActions.validateWebhook(req,res);
 });
-
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Chatbot' });
+  res.render('index', { title: 'ScChatty the chatbot!' });
 });
 
 module.exports = router;
