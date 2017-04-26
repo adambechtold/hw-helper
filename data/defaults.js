@@ -1,5 +1,4 @@
 
-
 var defaultUser = {
   "userID": "generic_user_0001",
   "messengerID": null,
