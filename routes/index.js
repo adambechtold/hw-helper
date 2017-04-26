@@ -1,8 +1,8 @@
 var express = require('express');
 var request = require('request');
-var FeedParser = require('feedparser');
 var algoliasearch = require('algoliasearch');
 var router = express.Router();
+var defaults = require('../data/defaults.js');
 
 
 //--------------ALGOLIA PARAMETERS-------------
@@ -100,44 +100,42 @@ const actions = {
 
   // get the name of the user from the database based on their sender id
   getName({context, entities, sessionId}) {
-    let senderId = sessions[sessionId].fbid;
-    console.log('getting name for sender: ', senderId);
+    let senderID = sessions[sessionId].fbid;
+    console.log('getting name for sender: ', senderID);
 
     let index = algoClient.initIndex('test_USERS');
 
     let promise = new Promise((resolve, reject) => {
       //search the database for the senders name in the context
-      index.search(senderId, (err, content) => {
+      index.search(senderID, (err, content) => {
         if(err) {
           console.error('aloglia search error :: getName', err);
         }
         else {
           let hitlist = content.hits;
 
-          if(hitlist && hitlist.length) {
-            console.log('search completed for : ', senderId);
+          if(hitlist && hitlist.length && hitlist[0].messengerID === senderID) 
+          // ensure the the list is not empty and that we have an exact match
+          {
+            console.log('search completed for : ', senderID);
             let firstname = content.hits[0].firstname;
-            let userId = content.hits[0].userID;
+            let userID = content.hits[0].userID;
 
             if(firstname) {
             console.log('it worked: ' + firstname);
-              resolve({
-                name : firstname,
-                userId : userId
-              });
+              resolve(content.hits[0]);
             } else {
               console.log('bye');
               reject(Error('it broke...'));
             }
           } else { //hitlist is empty
-              resolve({
-                name : 'Generic',
-                userId : 'generic_user_0001'
-              });
+              resolve(defaults.defaultUser);
           }
         }
       });
     });
+
+    console.log('default user: ', defaults.defaultUser);
 
     // attempt to abstract search user function
     //   continuing issue: ansynchronous behavior 
@@ -161,8 +159,10 @@ const actions = {
       console.log('it works');
       console.log(result);
       console.log('in promise');
-      context.name = result.name;
-      context.userId = result.userId;
+      // context.name = result.name;
+      context.userProfile = result;
+      context.name = context.userProfile.firstname;
+      // context.userID = result.userID;
       console.log('context: ', context);
       return context;
     }, (err) => {
@@ -180,16 +180,16 @@ const actions = {
 
     // if we have already found the user information in get name
     //    improvement: use searchUser function to find the user if you don't know who they are
-    if(context.userId) {
+    if(context.userProfile.userID) {
       let index = algoClient.initIndex('test_CLASSES');
 
       let promise = new Promise((resolve, reject) => {
         //search the database for the classes that the user is in based on userID
-        index.search(context.userId, (err, content) => {
+        index.search(context.userProfile.userID, (err, content) => {
           if(err) {
             console.error('algolia search error :: getHomework');
           } else {
-            console.log('getHomework :: search completed for: ', context.userId);
+            console.log('getHomework :: search completed for: ', context.userProfile.userID);
 
             let hitlist = content.hits;
 
@@ -319,22 +319,11 @@ function processMessage(senderId, messageText) {
 
   console.log('wit has run its actions');
 
-  
 
   // //send the intent to be printed back on FB
   wit.message(messageText, {})
     .then((data) => {
       console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
-      if(data.entities.intent) {
-        userIntent = data.entities.intent[0].value;
-        console.log('++++++++++');
-        console.log(userIntent);
-        console.log('++++++++++');
-        responseBuilder = 'this is a ' + userIntent + ' message';
-        //sendTextMessage(senderId, responseBuilder);
-      } else {
-        console.log('NO TASK');
-      }
     })
     .catch(console.error);
 }
