@@ -1,3 +1,11 @@
+// Main questions for Alred:
+// 1) Overcoming the asynchronous problems
+//   -- abstracting algolia actions into separate files
+//   -- wit.ai misinterpretation problem (probably caused by response/update delay)
+// 2) Passing variables around
+//   -- using the sessions variable from index.
+
+
 var express = require('express');
 var request = require('request');
 var algoliasearch = require('algoliasearch');
@@ -20,7 +28,7 @@ const witAccessToken = process.env.WIT_ACCESS_TOKEN;
 
 //------------FACEBOOK PARAMETERS------------
 var fbActions = require('./fbActions');
-const facebookAccessToken = process.env.TEST_BOT_PAGE_ACCESS_TOKEN;
+
 
 
 // This will contain all user sessions.
@@ -269,7 +277,7 @@ function receivedMessage(event) {
     // and send back the example. Otherwise, just echo the text we received.
     switch (messageText) {
       case 'generic':
-        sendGenericMessage(senderId);
+        fbActions.sendGenericMessage(senderId);
         break;
 
       default:
@@ -282,11 +290,6 @@ function receivedMessage(event) {
   }
 }
 
-// placeholder for advanced messages. See facebook messenger documentation for the
-// rest of the code
-function sendGenericMessage(senderId, messageText) {
-  // To be expanded in later sections
-}
 
 //handle messages before sending them off to be sent
 function processMessage(senderId, messageText) {
@@ -333,7 +336,6 @@ function processMessage(senderId, messageText) {
 // ===========ALGOLIA SEARCH FUNCTIONS================
 //search for a user based on the given param
 function searchUser(query) {
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
   let index = algoClient.initIndex('test_USERS');
 
   let promise = new Promise((resolve, reject) => {
@@ -350,15 +352,7 @@ function searchUser(query) {
           return hitlist[0];
         } else {
           console.log('user not found. Sending generic.');
-          return {
-            "userID" : "generic_user_0001",
-            "messengerID" : null,
-            "userTpye" : "student",
-            "firstname" : "Generic",
-            "lastname" : "User",
-            "school" : "Northeastern University",
-            "objectID" : "352867770",
-          };
+          return defaults.defaultUser;
         }
       }
     });

@@ -6,10 +6,11 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
-var users = require('./routes/users');
-var test = require('./routes/test');
-var wolfram = require('./routes/wolfram');
-var algolia = require('./routes/algolia');
+
+var users = require('./tests/users');
+var test = require('./tests/test');
+var wolfram = require('./tests/wolfram');
+var algolia = require('./tests/algolia');
 
 var app = express();
 
@@ -26,10 +27,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/', test);
-app.use('/', wolfram);
-app.use('/users', users);
-app.use('/', algolia);
+app.use('/tests', test);
+app.use('/tests', wolfram);
+app.use('/tests', users);
+app.use('/tests', algolia);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

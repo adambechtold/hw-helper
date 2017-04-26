@@ -2,11 +2,10 @@ var express = require('express');
 var request = require('request');
 var algoliasearch = require('algoliasearch');
 var router = express.Router();
+var algoliaActions = require('../routes/algoliaActions');
 
-const algoliaAppID = "BQJLD9GY2J";
-const algoliaSearchAPIkey = "ce1890df1d078dc818aea2a34770c2a7";
-const algoliaAdminAPIkey = "cf8fa30885084950bcd87ccfb22eba96";
-
+const algoliaAppID = process.env.ALGOLIA_APP_ID;
+const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
 
 var client = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
 
@@ -19,10 +18,16 @@ router.get('/algolia', (req, res) => {
 
 
 router.post('/algolia', (req, res) => {
+  body = req.body;
 
   index = client.initIndex(req.body.index);
   console.log("Index selected: " + req.body.index);
   intent = req.body.intent;
+
+  //USE THE GENERIC SEARCH FUNCTION
+  if(intent == 'gensearch') {
+    res.json(algoliaActions.search(body.queryAttribute, body.query, body.index, body.exactMatch, body.responseType, body.defaultValue));
+  }
 
   //ADD ITEM IF POST REQUEST IS TYPE ADD
   if(intent == "add") {

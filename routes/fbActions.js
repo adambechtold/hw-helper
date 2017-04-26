@@ -57,3 +57,11 @@ function callSendAPI(messageData) {
 }
 
 module.exports.sendTextMessage = sendTextMessage;
+
+// placeholder for advanced messages. See facebook messenger documentation for the
+// rest of the code
+var sendGenericMessage = (senderId, messageText) => {
+  // To be expanded in later sections
+}
+
+module.exports.sendGenericMessage = sendGenericMessage;

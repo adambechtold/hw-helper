@@ -1,4 +1,5 @@
-var index = require('index.js');
+// I want to define functions here to clean up the index, but I need access to a variable in index.
+
 
 // WitAi actions
 const actions = {
