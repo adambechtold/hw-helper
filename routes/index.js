@@ -255,6 +255,7 @@ const actions = {
             classList.push({
               title: hit.classID,
               subtitle : hit.description,
+              image_url : hit.imageURL,
               //item_url...
               //image_url
               buttons: [{

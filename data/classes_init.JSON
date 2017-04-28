@@ -2,8 +2,9 @@
   {
     "classID" : "CHEM1101_S1",
     "school" : "Northeastern University",
-    "userID" : "dmit_mend_0001",
+    "teachID" : "dmit_mend_0001",
     "description" : "Test tubes and bubbles. Sometimes explosions.",
+    "imageURL" : "https://s-media-cache-ak0.pinimg.com/originals/5c/9a/ed/5c9aed33a23a6bca0025cf332cb2f873.jpg",
     "studentList" : ["adam_bech_0001", "yasm_hash_0001", "emil_obri_0001"],
     "assignmentList" : [
       {
@@ -18,8 +19,9 @@
   {
     "classID" : "ENTR7030_S1",
     "school" : "Northeastern University",
-    "userID" : "elon_musk_0001",
+    "teachID" : "elon_musk_0001",
     "description" : "Bend the world to your will with the power of entreprenuership.",
+    "imageURL" : "http://mindless-marketing.com/wp-content/uploads/2014/05/rich-people-evil.jpg",
     "studentList" : ["kati_whil_0001", "andr_clou_0001"],
     "assignmentList" : [
       {
@@ -34,8 +36,9 @@
   {
     "classID" : "COOK2919_S1",
     "school" : "Northeastern University",
-    "userID" : "gord_rams_0001",
+    "teachID" : "gord_rams_0001",
     "description" : "Not about cooking. Learn the art of yelling about food.",
+    "imageURL" : "https://i.ytimg.com/vi/UjE-cBDFphQ/hqdefault.jpg",
     "studentList" : ["kati_whil_0001", "yasm_hash_0001"],
     "assignmentList" : [
       {
@@ -50,14 +53,32 @@
   {
     "classID" : "HAIR2001_S1",
     "school" : "333 Huntington",
-    "userID" : "kenn_leon_0001",
+    "teachID" : "kenn_leon_0001",
     "description" : "Learn the ins and outs of advanced nape designs.",
+    "imageURL" : "http://images.gawker.com/twtjebkms5hvjr0wiinh/c_scale,fl_progressive,q_80,w_800.jpg",
     "studentList" : ["adam_bech_0001", "andr_clou_0001"],
     "assignmentList" : [
       {
         "timeAssign" : "2017-03-10T12:00-05:00",
         "timeDue" : "2017-03-20T24:00-05:00",
         "description" : "Research the history of nape designs. Bring in your funnest fact.",
+        "uploadFile" : null,
+        "externResources" : null
+      }
+    ]
+  },
+  {
+    "classID" : "FRIENDSHIP_101",
+    "school" : "Northeastern University",
+    "teachID" : "life_coch_0001",
+    "description" : "Awwwwwww...",
+    "imageURL" : "http://i.imgur.com/4ZPSLSg.jpg",
+    "studentList" : ["adam_bech_0001", "andr_clou_0001", "emil_obri_0001", "yasm_hash_0001", "kati_whil_0001"],
+    "assignmentList" : [
+      {
+        "timeAssign" : "2017-03-10T12:00-05:00",
+        "timeDue" : "2017-03-20T24:00-05:00",
+        "description" : "Give one friend in the class a present. Start in alphabetical order.",
         "uploadFile" : null,
         "externResources" : null
       }
