@@ -221,6 +221,8 @@ const actions = {
   //get a list of the classes available at the students' school
   getClasses({context, entities, sessionId, text}) {
 
+    let senderID = sessions[sessionId].fbid;    
+
     if(!context.userProfile) {
       console.log('ERROR :: getClasses :: no User Profile available in context.');
       return context;
@@ -248,19 +250,39 @@ const actions = {
             resolve(classes);
           }
 
-          let classString = '';
+          let classList = [];
           for(let hit of hitlist) {
-            classString += hit.classID + ': ' + hit.description + '\n';
+            classList.push({
+              title: hit.classID,
+              subtitle : hit.description,
+              //item_url...
+              //image_url
+              buttons: [{
+                type: 'web_url',
+                title: 'Learn More',
+                url: 'http://www.northeastern.edu/scout/'
+              },
+              {
+                type: 'postback',
+                title: 'Sign me up!',
+                payload: 'classID: ' + hit.classID
+              }]
+            });
           }
 
-          classString;
-          resolve(classString)
+          fbActions.sendGenericMessage(senderID, classList);
+
+          resolve('complete');
         }
       });
     });
 
-    promise.then((classString) => {
-      context.classes = classString;
+    promise.then((classResponse) => {
+      if(classResponse == 'complete') {
+        context.classes = '';
+      } else {
+        context.classes = classResponse;
+      }
       return context;
     }).catch((err) => {
       // handle errors from promise
@@ -369,7 +391,7 @@ function receivedMessage(event) {
       default:
         processMessage(senderId, messageText);
     }
-  } else if (messageAttachments) {
+  } else if (messageAttachments && !message.is_echo) {
     // sendTextMessage(senderId, "Message with attachment received");
     console.log('this thing has attachments');
     sendTextMessage(senderId, 'Sorry, I can only process text messages right now');
@@ -421,42 +443,42 @@ function processMessage(senderId, messageText) {
 
 // ===========ALGOLIA SEARCH FUNCTIONS================
 //search for a user based on the given param
-function searchUser(query) {
-  let index = algoClient.initIndex('test_USERS');
+// function searchUser(query) {
+//   let index = algoClient.initIndex('test_USERS');
 
-  let promise = new Promise((resolve, reject) => {
-    index.search(query, (err, content) => {
-    //search the database
-      if(err) {
-        console.error('algolia search error :: getHomework');
-      } else {
-        console.log('getHomework :: search completed for: ', query);
-        let hitlist = content.hits;
+//   let promise = new Promise((resolve, reject) => {
+//     index.search(query, (err, content) => {
+//     //search the database
+//       if(err) {
+//         console.error('algolia search error :: getHomework');
+//       } else {
+//         console.log('getHomework :: search completed for: ', query);
+//         let hitlist = content.hits;
         
-        if(hitlist && hitlist.length) { //if the hit list has items
-          console.log('user found: ', hitlist[0]);
-          return hitlist[0];
-        } else {
-          console.log('user not found. Sending generic.');
-          return defaults.defaultUser;
-        }
-      }
-    });
-  });
+//         if(hitlist && hitlist.length) { //if the hit list has items
+//           console.log('user found: ', hitlist[0]);
+//           return hitlist[0];
+//         } else {
+//           console.log('user not found. Sending generic.');
+//           return defaults.defaultUser;
+//         }
+//       }
+//     });
+//   });
 
-  let outResult = {};
+//   let outResult = {};
 
-  promise.then((result) => {
-    console.log('it works');
-    console.log(result);
-    console.log('in promise');
-    return result;
-  }, (err) => {
-    console.error('it broke...');
-  });
+//   promise.then((result) => {
+//     console.log('it works');
+//     console.log(result);
+//     console.log('in promise');
+//     return result;
+//   }, (err) => {
+//     console.error('it broke...');
+//   });
 
-  return outResult;
-}
+//   return outResult;
+// }
 
 //webhook token verifier from Facebook
 router.get('/webhook/', function(req, res) {

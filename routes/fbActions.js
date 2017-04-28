@@ -34,7 +34,35 @@ var sendTextMessage = (recipientId, messageText) => {
   callSendAPI(messageData);
 }
 
+module.exports.sendTextMessage = sendTextMessage;
+
+
+//send an advanced message with attachments to facebook
+let sendGenericMessage = (recipientId, messagePayload) => {
+  console.log('=-=-=-=-=-=-=-=-==- SEND ATTACHMENTS');
+  let messageData = {
+    recipient: {
+      id: recipientId
+    },
+    message: {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'generic',
+          elements: messagePayload
+        }
+      }
+    }
+  };
+
+  callSendAPI(messageData);
+}
+
+module.exports.sendGenericMessage = sendGenericMessage;
+
+//facebook send message function
 function callSendAPI(messageData) {
+  console.log('-=-=-=-=--=-=-=-=-=-=-=- SENDING NOW!');
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
     qs: { access_token: facebookAccessToken },
@@ -46,22 +74,12 @@ function callSendAPI(messageData) {
       var recipientId = body.recipient_id;
       var messageId = body.message_id;
 
-      // console.log("Successfully sent generic message with id %s to recipient %s",
-      //   messageId, recipientId);
+      console.log("Successfully sent generic message with id %s to recipient %s",
+        messageId, recipientId);
     } else {
-      //console.error("Unable to send message.");
-      //console.error(response);
-      //console.error(error);
+      console.error("Unable to send message.");
+      console.error(response);
+      console.error(error);
     }
   });
 }
-
-module.exports.sendTextMessage = sendTextMessage;
-
-// placeholder for advanced messages. See facebook messenger documentation for the
-// rest of the code
-var sendGenericMessage = (senderId, messageText) => {
-  // To be expanded in later sections
-}
-
-module.exports.sendGenericMessage = sendGenericMessage;
