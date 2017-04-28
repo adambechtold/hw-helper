@@ -27,6 +27,9 @@ const witAccessToken = process.env.WIT_ACCESS_TOKEN;
 //------------FACEBOOK PARAMETERS------------
 var fbActions = require('./fbActions');
 
+//------------HELPER FUCNTIONS---------------
+var helperActions = require('./helperActions');
+
 
 
 // This will contain all user sessions.
@@ -98,7 +101,6 @@ const actions = {
     const {text, quickreplies} = response;
     const recipientId = sessions[sessionId].fbid;
     console.log('user said...', request.text);
-    console.log('user id...', recipientId);
     console.log('current context...', context);
     console.log('sending...', JSON.stringify(response));
 
@@ -107,6 +109,11 @@ const actions = {
 
   // get the name of the user from the database based on their sender id
   getName({context, entities, sessionId}) {
+    //see if the name is already in the context
+    if(context.name) {
+      return context;
+    }
+
     let senderID = sessions[sessionId].fbid;
     console.log('getting name for sender: ', senderID);
 
@@ -118,25 +125,23 @@ const actions = {
         if (err) {
           // reject promise if error is found
           console.log('algolia search error');
-          throw err;
+          reject(err);
         }
         else {
-          let hitlist = content.hits && (content.hits.length > 0) ? content.hits : hitlist;
-
-          let user = hitlist[0];
-
-          if (user.messengerID === senderID) {
-            // ensure the the list is not empty and that we have an exact match
-            resolve({
-              userInfo : user,
-              knonwUser : true
-            });
-          } else {
+          if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
+            // the user has not been found
             resolve({
               userInfo : defaults.defaultUser,
               knonwUser : false
             });
           }
+
+          let user = content.hits[0];
+
+          resolve({
+              userInfo : user,
+              knonwUser : true
+            });
         }
       });
     });
@@ -166,33 +171,103 @@ const actions = {
     let senderID = sessions[sessionId].fbid;
 
     // if user sent bad info...
-    if(!entities.contact) {
+    if(!entities.contact || entities.contact.length < 1) {
       fbActions.sendTextMessage(senderID, 'Not sure I caught that. Can you try something else?');
       return context;
     }
 
     //info is good. extract the name
-    let userName = entities.contact.value;
+    let userName = entities.contact[0].value;
 
     //parse through to get first and last name
     let firstName = userName.split(' ')[0];
     let lastName = userName.split(' ').slice(1).join(' ');
     
+    //create the userID
+    let userIDfirst = helperActions.stringPad(firstName, 4, '*').toLowerCase();
+    let userIDlast = helperActions.stringPad(lastName, 4, '*').toLowerCase();
 
-
+    //TODO lookup other users with this user name to generate another userID
+    //  for now, just use 0001
+    let userID = userIDfirst + '_' + userIDlast + '_0001';
+    firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+    lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+    
     let newUser = {
-      userID: "adam_bech_0001",
+      userID: userID,
       userTpye: "student",
       messengerID: senderID,
       firstname: firstName,
       lastname: lastName,
-      school: "ScChatty University"
+      school: "Northeastern University"
     }
 
     //TODO: create a new user running algolia
+    let index = algoClient.initIndex('test_USERS');
+    index.addObject(newUser, (err, content) => {
+      if(err) {
+        console.log('createUser :: Algolia search error');
+      } else {
+        console.log('new user added!!');
+      }
+    });
 
-    context.name = 'Adam';
+    context.name = firstName;
+    context.userProfile = newUser;
   
+    return context;
+  },
+
+  //get a list of the classes available at the students' school
+  getClasses({context, entities, sessionId, text}) {
+
+    if(!context.userProfile) {
+      console.log('ERROR :: getClasses :: no User Profile available in context.');
+      return context;
+    }
+
+    console.log('=========== CLASS SEARCH');
+    console.log('let\'s find all the classes for :', context.userProfile.school);
+
+    let userSchool = context.userProfile.school;
+    let index = algoClient.initIndex('test_CLASSES');
+
+    let promise = new Promise((resolve, reject) => {
+      //search the database for the senders name in the context
+      index.search(userSchool, (err, content) => {
+        if (err) {
+          // reject promise if error is found
+          console.log('algolia search error');
+          reject(err);
+        }
+        else {
+          let hitlist = content.hits;
+
+          if(hitlist.length < 1) {
+            let classes = 'No classes available at ' + userSchool + ' : (';
+            resolve(classes);
+          }
+
+          let classString = '';
+          for(let hit of hitlist) {
+            classString += hit.classID + ': ' + hit.description + '\n';
+          }
+
+          classString;
+          resolve(classString)
+        }
+      });
+    });
+
+    promise.then((classString) => {
+      context.classes = classString;
+      return context;
+    }).catch((err) => {
+      // handle errors from promise
+      console.error('it broke...');
+      return context;
+    });
+
     return context;
   },
 
@@ -241,11 +316,7 @@ const actions = {
       });
 
       promise.then((result) => {
-        console.log('it works');
-        console.log(result);
-        console.log('in promise');
         context.assignments = result;
-        console.log('context: ', context);
         return context;
       }, (err) => {
         console.error('it broke...');

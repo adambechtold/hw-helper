@@ -1,0 +1,25 @@
+
+Regular user:
+
+>Hi
+  <Hi Adam! Welcome back!
+>What's my homework?
+  <CS: Assignemnt 12 - Due: 12/5/17 @ 9:00pm
+>Thanks 
+
+First time user:
+
+>Hi
+  <Hi Stranger! I'm ScChatty!
+  <What's your name?
+>Tom Smith
+  <Nice to meet you Tom!
+  <Let's sign up for classes. Here are some to choose from:
+    <1. CS2051 - design some stuff
+    <2. ENTR2010 - get money by working your butt off
+  <Just reply with a list of numbers separated by spaces: "1 2 3 4"
+>2 23 4
+  <Nice! You are all signed up for ...
+  <Checkback anytime to ask "whats my homework?" get your assignments.
+>Thanks
+
