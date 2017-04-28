@@ -112,49 +112,88 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    index.search(senderID, (err, content) => {
-      if(err) {
-        // reject promise if error is found
-        console.log('algolia search error');
-        throw err;
-      }
-      else {
-        let hitlist = content.hits && content.hits.length ? content.hits : hitlist;
-
-        if (!hitlist) {
-          context.userProfile = defaults.defaultUser;
-          context.name = 'alfred';
-          return context;
+    let promise = new Promise((resolve, reject) => {
+    //   //search the database for the senders name in the context
+      index.search(senderID, (err, content) => {
+        if (err) {
+          // reject promise if error is found
+          console.log('algolia search error');
+          throw err;
         }
+        else {
+          let hitlist = content.hits && (content.hits.length > 0) ? content.hits : hitlist;
 
-        let user = hitlist[0];
+          let user = hitlist[0];
 
-        if (user.messengerID === senderID) {
-          console.log('hi+_+_+_+_+_');
-          // ensure the the list is not empty and that we have an exact match
-          context.userProfile = user;
-          context.name = context.userProfile.firstname; 
-          return context;
-        } 
-      }
+          if (user.messengerID === senderID) {
+            // ensure the the list is not empty and that we have an exact match
+            resolve({
+              userInfo : user,
+              knonwUser : true
+            });
+          } else {
+            resolve({
+              userInfo : defaults.defaultUser,
+              knonwUser : false
+            });
+          }
+        }
+      });
     });
 
-    // let promise = new Promise((resolve, reject) => {
-    //   //search the database for the senders name in the context
-    // });
+    promise.then((result) => {
+      if(result.knonwUser) {
+        context.userProfile = result.userInfo;
+        context.name = context.userProfile.firstname;
+      } else {
+        console.log('let\'s make a new user');
+        context.newUser = true;
+      }
+      console.log('end promise context: ', context);
+      return context;
+    }).catch((err) => {
+      // handle errors from promise
+      console.error('it broke...');
+      return context;
+    });
 
-    // promise.then((user) => {
-    //   context.userProfile = user;
-    //   context.name = context.userProfile.firstname;
-    //   console.log('context: ', context);
-    //   return context;
-    // }).catch((err) => {
-    //   // handle errors from promise
-    //   console.error('it broke...');
-    //   return context;
-    // });
+    return context;
+  }, 
+  
+  //create a new user with their fbid and name
+  createUser({sessionId, context, text, entities}) {
+    console.log('========================= CREATE NEW USER');
+    let senderID = sessions[sessionId].fbid;
 
-    // return context;
+    // if user sent bad info...
+    if(!entities.contact) {
+      fbActions.sendTextMessage(senderID, 'Not sure I caught that. Can you try something else?');
+      return context;
+    }
+
+    //info is good. extract the name
+    let userName = entities.contact.value;
+
+    //parse through to get first and last name
+    let firstName = userName.split(' ')[0];
+    let lastName = userName.split(' ').slice(1).join(' ');
+    
+
+
+    let newUser = {
+      userID: "adam_bech_0001",
+      userTpye: "student",
+      messengerID: senderID,
+      firstname: firstName,
+      lastname: lastName,
+      school: "ScChatty University"
+    }
+
+    //TODO: create a new user running algolia
+
+    context.name = 'Adam';
+  
+    return context;
   },
 
   //get hw assignemnts for this student
@@ -347,7 +386,6 @@ function searchUser(query) {
 
   return outResult;
 }
-
 
 //webhook token verifier from Facebook
 router.get('/webhook/', function(req, res) {
