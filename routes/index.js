@@ -161,6 +161,7 @@ const actions = {
     });
 
     console.log('getName complete_+_+_+_+_+_+_++_');
+    // return context;
   }, 
   
   //create a new user with their fbid and name
