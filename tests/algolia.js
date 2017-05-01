@@ -16,6 +16,46 @@ router.get('/algolia', (req, res) => {
   res.json('hello');
 })
 
+router.post('/algoliaTest', (req, res) => {
+  let body = req.body;
+
+  let index = client.initIndex('test_USERS');
+
+  let promise = new Promise((resolve, reject) => {
+    index.search(body.query, (err, content) => {
+      if (err) {
+        console.log('search end in :: ALOGLIA ERROR');
+         reject(err);
+      }
+
+      else if (content.hits.length < 1 || content.hits[0].firstname != body.query) {
+        console.log('search end in :: ALGOLIA: NO USER FOUND');
+        resolve({userFound : false});
+      } 
+
+      else {
+        console.log('search end in user found');
+        resolve({
+          userFound: true,
+          user: content.hits[0]
+        });
+      }
+    }); //end search function
+  }); // end promise
+
+  promise.then((result) => {
+    console.log('return promise resolution');
+    if(result.userFound) {
+      res.json('we found: ' + result.user.firstname);
+    }
+      res.json('you need to create a new user');
+  }).catch((err) => {
+    console.log('return error to the client');
+    res.json(err);
+  });
+});
+
+
 
 router.post('/algolia', (req, res) => {
   body = req.body;
