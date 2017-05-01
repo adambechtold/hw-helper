@@ -119,35 +119,33 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    let promise = new Promise((resolve, reject) => {
-    //   //search the database for the senders name in the context
+    new Promise((resolve, reject) => {
+      //   //search the database for the senders name in the context
       index.search(senderID, (err, content) => {
         if (err) {
           // reject promise if error is found
           console.log('algolia search error');
           reject(err);
         }
-        else {
-          if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
-            // the user has not been found
-            resolve({
-              userInfo : defaults.defaultUser,
-              knonwUser : false
-            });
-          }
 
-          let user = content.hits[0];
-
+        if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
+          // the user has not been found
           resolve({
-              userInfo : user,
-              knonwUser : true
-            });
+            userInfo: defaults.defaultUser,
+            knonwUser: false
+          });
         }
-      });
-    });
 
-    promise.then((result) => {
-      if(result.knonwUser) {
+        let user = content.hits[0];
+
+        resolve({
+          userInfo: user,
+          knonwUser: true
+        });
+
+      });
+    }).then((result) => {
+      if (result.knonwUser) {
         context.userProfile = result.userInfo;
         context.name = context.userProfile.firstname;
       } else {
@@ -162,12 +160,11 @@ const actions = {
       return context;
     });
 
-    return context;
+    console.log('getName complete_+_+_+_+_+_+_++_');
   }, 
   
   //create a new user with their fbid and name
   createUser({sessionId, context, text, entities}) {
-    console.log('========================= CREATE NEW USER');
     let senderID = sessions[sessionId].fbid;
 
     // if user sent bad info...
@@ -257,7 +254,7 @@ const actions = {
               subtitle : hit.description,
               image_url : hit.imageURL,
               //item_url...
-              //image_url
+              //image_url...
               buttons: [{
                 type: 'web_url',
                 title: 'Learn More',
