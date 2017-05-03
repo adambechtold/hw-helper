@@ -31,7 +31,6 @@ let fbActions = require('./fbActions');
 var helperActions = require('./helperActions');
 
 
-
 // This will contain all user sessions.
 // Each session has an entry:
 // sessionId -> {fbid: facebookUserId, context: sessionState}
@@ -112,8 +111,9 @@ const actions = {
   // get the name of the user from the database based on their sender id
   getName({context, entities, sessionId}) {
     //see if the name is already in the context
-    console.log('getName HERE');
     if(context.name) {
+      console.log('getName:: name already found');
+      console.log('getName context: ', context);
       return context;
     }
 
@@ -157,7 +157,7 @@ const actions = {
       let user = content.hits[0];
 
       context.userProfile = user;
-      context.name = context.userProfile.firstname;
+      context.name = user.firstname;
 
       return context;
     }).catch((err) => {
@@ -165,7 +165,7 @@ const actions = {
       console.error(err);
     });
 
-    // return context;
+//    return context;
   }, 
   
   //create a new user with their fbid and name
@@ -222,7 +222,6 @@ const actions = {
 
   //get a list of the classes available at the students' school
   getClasses({context, entities, sessionId, text}) {
-    console.log('getClasses HERE');
     let senderID = sessions[sessionId].fbid;    
 
     if(!context.userProfile) {
@@ -376,6 +375,9 @@ function receivedMessage(event) {
   let messageAttachments = message.attachments;
 
   if (messageText && !message.is_echo) {
+    console.log("Received message for user %d and page %d at %d with message:",
+    senderId, recipientId, timeOfMessage);
+    console.log(JSON.stringify(message));
     // If we receive a text message, check to see if it matches a keyword
     // and send back the example. Otherwise, just echo the text we received.
     processMessage(senderId, messageText);
@@ -398,6 +400,14 @@ function processMessage(senderId, messageText) {
 
   console.log('sesssionID: ', sessionId);
 
+
+  // how did wit thing about this message?
+  wit.message(messageText, {})
+    .then((data) => {
+      console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
+    })
+    .catch(console.error);
+
   wit.runActions (
     sessionId, //the user's current session
     messageText, // user's message
@@ -417,13 +427,6 @@ function processMessage(senderId, messageText) {
       console.log(witAccessToken);
       console.error('Houston, we have a probelm with Wit: ', err.stack || err);
     });
-
-  // //send the intent to be printed back on FB
-  wit.message(messageText, {})
-    .then((data) => {
-      console.log('Yay, got Wit.ai response: ' + JSON.stringify(data));
-    })
-    .catch(console.error);
 }
 
 

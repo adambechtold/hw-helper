@@ -39,7 +39,6 @@ module.exports.sendTextMessage = sendTextMessage;
 
 //send an advanced message with attachments to facebook
 let sendGenericMessage = (recipientId, messagePayload) => {
-  console.log('=-=-=-=-=-=-=-=-==- SEND ATTACHMENTS');
   let messageData = {
     recipient: {
       id: recipientId
