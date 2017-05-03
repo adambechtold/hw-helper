@@ -16,7 +16,8 @@ router.get('/algolia', (req, res) => {
   res.json('hello');
 })
 
-router.post('/algoliaTest', (req, res) => {
+//test the use of promises on a basic algolia search
+router.post('/algoliaSearchTest', (req, res) => {
   let body = req.body;
 
   let index = client.initIndex('test_USERS');
@@ -47,15 +48,32 @@ router.post('/algoliaTest', (req, res) => {
     console.log('return promise resolution');
     if(result.userFound) {
       res.json('we found: ' + result.user.firstname);
-    }
+    } else {
       res.json('you need to create a new user');
+    }
   }).catch((err) => {
     console.log('return error to the client');
     res.json(err);
   });
 });
 
+//test the use of search modifiers on an aloglia query
+router.post('/algoliaSearchModTest', (req, res) => {
+  let body = req.body;
 
+  let index = client.initIndex('test_USERS');
+
+  let promise = index.search(body.query, body.searchModifiers);
+
+  promise.then((result) => {
+    // return promise resolution
+    console.log(result);
+    res.json(result);
+  }).catch((err) => {
+    console.log(err);
+    res.send('it died...');
+  });
+});
 
 router.post('/algolia', (req, res) => {
   body = req.body;
