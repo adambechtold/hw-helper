@@ -4,7 +4,7 @@ var request = require('request');
 const facebookAccessToken = process.env.TEST_BOT_PAGE_ACCESS_TOKEN;
 
 // answer webhook validation requests from facebook
-var validateWebhook = (req,res) => {
+let validateWebhook = (req,res) => {
   if (req.query['hub.mode'] === 'subscribe' &&
       req.query['hub.verify_token'] === 'token_works') {
     console.log("Validating webhook");
@@ -18,7 +18,7 @@ var validateWebhook = (req,res) => {
 module.exports.validateWebhook = validateWebhook;
 
 // functions to send stuff
-var sendTextMessage = (recipientId, messageText) => {
+let sendTextMessage = (recipientId, messageText) => {
 
   responseBuilder = messageText;
 
@@ -59,6 +59,7 @@ let sendGenericMessage = (recipientId, messagePayload) => {
 }
 
 module.exports.sendGenericMessage = sendGenericMessage;
+
 
 //facebook send message function
 function callSendAPI(messageData) {

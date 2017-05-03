@@ -75,6 +75,8 @@ router.post('/webhook', function (req, res) {
           receivedMessage(event);
         } else if (event.delivery) {
            console.log('Message delivered to id: ', event.sender.id);
+        } else if (event.postback) {
+          receivedPostback(event);
         } else if (event.read) {
            //user read your message. do nothing
         } else {
@@ -110,12 +112,12 @@ const actions = {
   // get the name of the user from the database based on their sender id
   getName({context, entities, sessionId}) {
     //see if the name is already in the context
+    console.log('getName HERE');
     if(context.name) {
       return context;
     }
 
     let senderID = sessions[sessionId].fbid;
-    console.log('getting name for sender: ', senderID);
 
     let index = algoClient.initIndex('test_USERS');
 
@@ -160,7 +162,6 @@ const actions = {
       return context;
     });
 
-    console.log('getName complete_+_+_+_+_+_+_++_');
     // return context;
   }, 
   
@@ -218,7 +219,7 @@ const actions = {
 
   //get a list of the classes available at the students' school
   getClasses({context, entities, sessionId, text}) {
-
+    console.log('getClasses HERE');
     let senderID = sessions[sessionId].fbid;    
 
     if(!context.userProfile) {
@@ -264,7 +265,7 @@ const actions = {
               {
                 type: 'postback',
                 title: 'Sign me up!',
-                payload: 'classID: ' + hit.classID
+                payload: 'classSignup|' + hit.school + '|' + hit.classID
               }]
             });
           }
@@ -277,11 +278,7 @@ const actions = {
     });
 
     promise.then((classResponse) => {
-      if(classResponse == 'complete') {
-        context.classes = '';
-      } else {
-        context.classes = classResponse;
-      }
+      context.classes = classResponse;
       return context;
     }).catch((err) => {
       // handle errors from promise
@@ -294,9 +291,6 @@ const actions = {
 
   //get hw assignemnts for this student
   getHomework({context, entities}) {
-    console.log('========');
-    console.log('sending... asignments....');
-    console.log('========');
 
     // if we have already found the user information in get name
     //    improvement: use searchUser function to find the user if you don't know who they are
@@ -379,17 +373,10 @@ function receivedMessage(event) {
   var messageAttachments = message.attachments;
 
   if (messageText && !message.is_echo) {
-
     // If we receive a text message, check to see if it matches a keyword
     // and send back the example. Otherwise, just echo the text we received.
-    switch (messageText) {
-      case 'generic':
-        fbActions.sendGenericMessage(senderId);
-        break;
+    processMessage(senderId, messageText);
 
-      default:
-        processMessage(senderId, messageText);
-    }
   } else if (messageAttachments && !message.is_echo) {
     // sendTextMessage(senderId, "Message with attachment received");
     console.log('this thing has attachments');
@@ -428,9 +415,6 @@ function processMessage(senderId, messageText) {
       console.error('Houston, we have a probelm with Wit: ', err.stack || err);
     });
 
-  console.log('wit has run its actions');
-
-
   // //send the intent to be printed back on FB
   wit.message(messageText, {})
     .then((data) => {
@@ -440,49 +424,56 @@ function processMessage(senderId, messageText) {
 }
 
 
-// ===========ALGOLIA SEARCH FUNCTIONS================
-//search for a user based on the given param
-// function searchUser(query) {
-//   let index = algoClient.initIndex('test_USERS');
-
-//   let promise = new Promise((resolve, reject) => {
-//     index.search(query, (err, content) => {
-//     //search the database
-//       if(err) {
-//         console.error('algolia search error :: getHomework');
-//       } else {
-//         console.log('getHomework :: search completed for: ', query);
-//         let hitlist = content.hits;
-        
-//         if(hitlist && hitlist.length) { //if the hit list has items
-//           console.log('user found: ', hitlist[0]);
-//           return hitlist[0];
-//         } else {
-//           console.log('user not found. Sending generic.');
-//           return defaults.defaultUser;
-//         }
-//       }
-//     });
-//   });
-
-//   let outResult = {};
-
-//   promise.then((result) => {
-//     console.log('it works');
-//     console.log(result);
-//     console.log('in promise');
-//     return result;
-//   }, (err) => {
-//     console.error('it broke...');
-//   });
-
-//   return outResult;
-// }
-
 //webhook token verifier from Facebook
 router.get('/webhook/', function(req, res) {
   fbActions.validateWebhook(req,res);
 });
+
+//handle postbacks from messenger
+function receivedPostback(event) {
+  let senderId = event.sender.id;
+  let recipientId = event.recipient.id;
+  let timestamp = event.timestamp;
+  let payload = event.postback.payload;
+
+  console.log('Received postback for user %d and page %d at %d with payload:',
+    senderId, recipientId, timestamp);
+  console.log(payload);
+
+  let sessionId = findOrCreateSession(senderId);
+
+  payload = payload.split('|');
+  let payloadType = payload[0];
+
+  if (payloadType === 'classSignup') {
+    console.log('time to sign you up for classes!')
+    //this is a message to signup the current user to a certain class
+    let school = payload[1];
+    let classID = payload[2];
+    // get the user info for the the current user
+    let context = witActions.getName({context : {}, entities : {}, sessionID : sessionId});
+
+    console.log('postback context', context);
+
+
+  //   if(!context.name) {
+  //     // no user under this name
+  //     console.log('UNKNOWN USER :: receivedPostback');
+  //     return;
+  //   }
+
+  //   userID = context.userProfile.userID;
+
+  //   //enroll the user the class
+  //   let index = algoClient.initIndex('test_CLASSES');
+
+
+
+
+  }
+
+}
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
