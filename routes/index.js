@@ -151,13 +151,18 @@ const actions = {
       } else {
         console.log('let\'s make a new user');
         context.newUser = true;
+        return context;
       }
-      console.log('end promise context: ', context);
+
+      let user = content.hits[0];
+
+      context.userProfile = user;
+      context.name = context.userProfile.firstname;
+
       return context;
     }).catch((err) => {
-      // handle errors from promise
-      console.error('it broke...');
-      return context;
+      console.log('ALGOLIA SEARCH ERROR :: getName');
+      console.error(err);
     });
 
     // return context;
@@ -420,8 +425,6 @@ function processMessage(senderId, messageText) {
     })
     .catch(console.error);
 }
-
-
 
 
 //============HANDLE SOME BASIC REQUESTS================
