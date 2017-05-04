@@ -6,11 +6,11 @@
 //   -- using the sessions variable from index.
 
 
-var express = require('express');
-var request = require('request');
-var algoliasearch = require('algoliasearch');
-var router = express.Router();
-var defaults = require('../data/defaults');
+const express = require('express');
+const request = require('request');
+const algoliasearch = require('algoliasearch');
+let router = express.Router();
+const defaults = require('../data/defaults');
 
 //--------------ALGOLIA PARAMETERS-------------
 const algoliaAppID = process.env.ALGOLIA_APP_ID;
@@ -25,7 +25,7 @@ const witEndpoint = "https://api.wit.ai/message?v=20170424&q=";
 const witAccessToken = process.env.WIT_ACCESS_TOKEN;
 
 //------------FACEBOOK PARAMETERS------------
-var fbActions = require('./fbActions');
+let fbActions = require('./fbActions');
 
 //------------HELPER FUCNTIONS---------------
 var helperActions = require('./helperActions');
@@ -59,15 +59,15 @@ const findOrCreateSession = (fbid) => {
 
 // handle new events to the webhook
 router.post('/webhook', function (req, res) {
-  var data = req.body;
+  let data = req.body;
 
   // Make sure this is a page subscription
   if (data.object === 'page') {
 
     // Iterate over each entry - there may be multiple if batched
     data.entry.forEach(function(entry) {
-      var pageID = entry.id;
-      var timeOfEvent = entry.time;
+      let pageID = entry.id;
+      let timeOfEvent = entry.time;
 
       // Iterate over each messaging event
       entry.messaging.forEach(function(event) {
@@ -121,31 +121,29 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    new Promise((resolve, reject) => {
-      //   //search the database for the senders name in the context
-      index.search(senderID, (err, content) => {
-        if (err) {
-          // reject promise if error is found
-          console.log('algolia search error');
-          reject(err);
-        }
+    //   //search the database for the senders name in the context
+    index.search(senderID, (err, content) => {
+      if (err) {
+        // reject promise if error is found
+        console.log('algolia search error');
+        reject(err);
+      }
 
-        if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
-          // the user has not been found
-          resolve({
-            userInfo: defaults.defaultUser,
-            knonwUser: false
-          });
-        }
-
-        let user = content.hits[0];
-
+      if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
+        // the user has not been found
         resolve({
-          userInfo: user,
-          knonwUser: true
+          userInfo: defaults.defaultUser,
+          knonwUser: false
         });
+      }
 
+      let user = content.hits[0];
+
+      resolve({
+        userInfo: user,
+        knonwUser: true
       });
+
     }).then((result) => {
       if (result.knonwUser) {
         context.userProfile = result.userInfo;
@@ -358,19 +356,19 @@ const wit = new Wit({
 
 // handle incoming facebook messages
 function receivedMessage(event) {
-  var senderId = event.sender.id;
-  var recipientId = event.recipient.id;
-  var timeOfMessage = event.timestamp;
-  var message = event.message;
+  let senderId = event.sender.id;
+  let recipientId = event.recipient.id;
+  let timeOfMessage = event.timestamp;
+  let message = event.message;
 
   console.log("Received message for user %d and page %d at %d with message:",
     senderId, recipientId, timeOfMessage);
   console.log(JSON.stringify(message));
 
-  var messageId = message.mid;
+  let messageId = message.mid;
 
-  var messageText = message.text;
-  var messageAttachments = message.attachments;
+  let messageText = message.text;
+  let messageAttachments = message.attachments;
 
   if (messageText && !message.is_echo) {
     // If we receive a text message, check to see if it matches a keyword
@@ -424,10 +422,15 @@ function processMessage(senderId, messageText) {
 }
 
 
+
+
+//============HANDLE SOME BASIC REQUESTS================
+
 //webhook token verifier from Facebook
 router.get('/webhook/', function(req, res) {
   fbActions.validateWebhook(req,res);
 });
+
 
 //handle postbacks from messenger
 function receivedPostback(event) {
