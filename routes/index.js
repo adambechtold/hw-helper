@@ -130,7 +130,7 @@ const actions = {
     });
 
     index.search(senderID).then((content) => {
-      console.log(content);
+
       if (content.hits.length < 1 || senderID != content.hits[0].messengerID) {
         // the user has not been found
         context.newUser = true;
@@ -221,61 +221,48 @@ const actions = {
     let userSchool = context.userProfile.school;
     let index = algoClient.initIndex('test_CLASSES');
 
-    let promise = new Promise((resolve, reject) => {
-      //search the database for the senders name in the context
-      index.search(userSchool, (err, content) => {
-        if (err) {
-          // reject promise if error is found
-          console.log('algolia search error');
-          reject(err);
-        }
-        else {
-          let hitlist = content.hits;
+    index.search(userSchool).then((content) => {
+      let hitlist = content.hits;
 
-          if(hitlist.length < 1) {
-            let classes = 'No classes available at ' + userSchool + ' : (';
-            resolve(classes);
-          }
+      if (hitlist.length < 1) {
+        context.classes = 'No classes available at ' + userSchool + ' : (';
+        return context;
+      }
 
-          let classList = [];
-          for(let hit of hitlist) {
-            classList.push({
-              title: hit.classID,
-              subtitle : hit.description,
-              image_url : hit.imageURL,
-              //item_url...
-              //image_url...
-              buttons: [{
-                type: 'web_url',
-                title: 'Learn More',
-                url: 'http://www.northeastern.edu/scout/'
-              },
-              {
-                type: 'postback',
-                title: 'Sign me up!',
-                payload: '{ "type" : "classSignup", \
+      let classList = [];
+
+      for(let hit of hitlist) {
+        classList.push({
+          title: hit.classID,
+          subtitle: hit.description,
+          image_url: hit.imageURL,
+          //item_url...
+          //image_url...
+          buttons: [{
+            type: 'web_url',
+            title: 'Learn More',
+            url: 'http://www.northeastern.edu/scout/'
+          },
+          {
+            type: 'postback',
+            title: 'Sign me up!',
+            payload: '{ "type" : "classSignup", \
                 "school" : "' + hit.school + '", \
                 "classID" : "' + hit.classID + '", \
                 "senderID" : "' + senderID + '", \
                 "userID" : "' + context.userProfile.userID + '", \
                 "classObjectID" : "' + hit.objectID + '" } '
-              }]
-            });
-          }
+          }]
+        });
+      }
 
-          fbActions.sendGenericMessage(senderID, classList);
+      fbActions.sendGenericMessage(senderID, classList);
 
-          resolve('complete');
-        }
-      });
-    });
-
-    promise.then((classResponse) => {
-      context.classes = classResponse;
       return context;
+
     }).catch((err) => {
-      // handle errors from promise
-      console.error('it broke...');
+      console.log('ALGOLIA SEARCH ERROR :: getClasses');
+      console.log(err);
       return context;
     });
 
