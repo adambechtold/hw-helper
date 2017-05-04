@@ -6,10 +6,18 @@ const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
 
 
 // clients for each table
-var algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
+let algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
+
+let exactSearchSettings = {
+  hitsPerPage : 1,
+  typoTolerance : false
+};
+
+module.exports.exactSearchSettings = exactSearchSettings;
 
 
-var search = (queryAttribute, query, table, exactMatch, responseType, defaultValue) => {
+
+let search = (queryAttribute, query, table, exactMatch, responseType, defaultValue) => {
   
   let index = algoClient.initIndex(table);
 

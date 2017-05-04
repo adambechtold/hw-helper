@@ -19,6 +19,8 @@ const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
 // clients for each table
 var algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
 
+let algoActions = require('./algoliaActions');
+
 //--------------WIT.AI PARAMETERS--------------
 const {Wit, log} = require('node-wit');
 const witEndpoint = "https://api.wit.ai/message?v=20170424&q=";
@@ -121,35 +123,18 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    //   //search the database for the senders name in the context
-    index.search(senderID, (err, content) => {
-      if (err) {
-        // reject promise if error is found
-        console.log('algolia search error');
-        reject(err);
-      }
+    console.log('lets look for: ', typeof(senderID));
 
-      if (content.hits.length < 1 || content.hits[0].messengerID != senderID) {
+    //set index to do an exact search
+    index.setSettings({
+      hitsPerPage: 1,
+      typoTolerance: false
+    });
+
+    index.search(senderID).then((content) => {
+      console.log(content);
+      if (content.hits.length < 1 || senderID != content.hits[0].messengerID) {
         // the user has not been found
-        resolve({
-          userInfo: defaults.defaultUser,
-          knonwUser: false
-        });
-      }
-
-      let user = content.hits[0];
-
-      resolve({
-        userInfo: user,
-        knonwUser: true
-      });
-
-    }).then((result) => {
-      if (result.knonwUser) {
-        context.userProfile = result.userInfo;
-        context.name = context.userProfile.firstname;
-      } else {
-        console.log('let\'s make a new user');
         context.newUser = true;
         return context;
       }
@@ -216,6 +201,9 @@ const actions = {
 
     context.name = firstName;
     context.userProfile = newUser;
+
+    //remove new user context
+    !context.newUser || delete context.user;
   
     return context;
   },
@@ -267,7 +255,12 @@ const actions = {
               {
                 type: 'postback',
                 title: 'Sign me up!',
-                payload: 'classSignup|' + hit.school + '|' + hit.classID
+                payload: '{ "type" : "classSignup", \
+                "school" : "' + hit.school + '", \
+                "classID" : "' + hit.classID + '", \
+                "senderID" : "' + senderID + '", \
+                "userID" : "' + context.userProfile.userID + '", \
+                "objectID" : "' + context.userProfile.objectID + '" } '
               }]
             });
           }
@@ -451,30 +444,16 @@ function receivedPostback(event) {
 
   let sessionId = findOrCreateSession(senderId);
 
-  payload = payload.split('|');
-  let payloadType = payload[0];
+  payload = JSON.parse(payload);
+  let payloadType = payload.type;
 
   if (payloadType === 'classSignup') {
     console.log('time to sign you up for classes!')
     //this is a message to signup the current user to a certain class
-    let school = payload[1];
-    let classID = payload[2];
+    let school = payload.school;
+    let classID = payload.classID;
     // get the user info for the the current user
-    let context = witActions.getName({context : {}, entities : {}, sessionID : sessionId});
-
-    console.log('postback context', context);
-
-
-  //   if(!context.name) {
-  //     // no user under this name
-  //     console.log('UNKNOWN USER :: receivedPostback');
-  //     return;
-  //   }
-
-  //   userID = context.userProfile.userID;
-
-  //   //enroll the user the class
-  //   let index = algoClient.initIndex('test_CLASSES');
+    
 
 
 
