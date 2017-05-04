@@ -123,8 +123,6 @@ const actions = {
 
     let index = algoClient.initIndex('test_USERS');
 
-    console.log('lets look for: ', typeof(senderID));
-
     //set index to do an exact search
     index.setSettings({
       hitsPerPage: 1,
@@ -150,7 +148,7 @@ const actions = {
       console.error(err);
     });
 
-//    return context;
+   return context;
   }, 
   
   //create a new user with their fbid and name
@@ -260,7 +258,7 @@ const actions = {
                 "classID" : "' + hit.classID + '", \
                 "senderID" : "' + senderID + '", \
                 "userID" : "' + context.userProfile.userID + '", \
-                "objectID" : "' + context.userProfile.objectID + '" } '
+                "classObjectID" : "' + hit.objectID + '" } '
               }]
             });
           }
@@ -305,20 +303,16 @@ const actions = {
             let assignmentString = '';
 
             for (let hit of hitlist) {
-              console.log(1);
-              console.log('for: ', hit.classID);
               assignmentString += 'for: ' + hit.classID + '\n';
               for (let assignment of hit.assignmentList) {
-                console.log(assignment.description);
                 assignmentString += '  ' + assignment.description + '\n';
               }
             }
 
             if(assignmentString) {
-              console.log('hw worked');
               resolve(assignmentString);
             } else {
-              console.log('hw is a no go...');
+              console.log('FAILURE in getHomework :: ');
               reject(Error('it broke...')); 
             }
           }
@@ -387,12 +381,7 @@ function receivedMessage(event) {
 function processMessage(senderId, messageText) {
   let responseBuilder = messageText;
 
-  console.log('pre-wit. messageText: ', messageText);
-
   let sessionId = findOrCreateSession(senderId);
-
-  console.log('sesssionID: ', sessionId);
-
 
   // how did wit thing about this message?
   wit.message(messageText, {})
@@ -433,31 +422,44 @@ router.get('/webhook/', function(req, res) {
 
 //handle postbacks from messenger
 function receivedPostback(event) {
-  let senderId = event.sender.id;
+  let senderID = event.sender.id;
   let recipientId = event.recipient.id;
   let timestamp = event.timestamp;
   let payload = event.postback.payload;
 
   console.log('Received postback for user %d and page %d at %d with payload:',
-    senderId, recipientId, timestamp);
+    senderID, recipientId, timestamp);
   console.log(payload);
 
-  let sessionId = findOrCreateSession(senderId);
+  let sessionId = findOrCreateSession(senderID);
 
   payload = JSON.parse(payload);
   let payloadType = payload.type;
 
   if (payloadType === 'classSignup') {
-    console.log('time to sign you up for classes!')
     //this is a message to signup the current user to a certain class
     let school = payload.school;
     let classID = payload.classID;
     // get the user info for the the current user
     
+    let index = algoClient.initIndex('test_CLASSES');
 
-
-
-
+    //complete a partial update of the class to add the user's userID if they are 
+    //  not already signed up for that class
+    index.partialUpdateObject({
+      studentList : {
+        value : payload.userID,
+        _operation: 'AddUnique'
+      },
+      objectID : payload.classObjectID
+    }).then((content) => {
+      //send confirmation message
+      fbActions.sendTextMessage(senderID, "You're all signed up for " + classID + '!');
+    }).catch((err) => {
+      //send failure message
+      fbActions.sendTextMessage(senderID, 'Looks like that class is full...');
+      console.log('recievedPostback ERROR :: partial update :: ', err);
+    });
   }
 
 }

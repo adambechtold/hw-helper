@@ -88,7 +88,7 @@ router.post('/alogliaPartialUpdateTest', (req, res) => {
   index.partialUpdateObject({
     studentList : {
       value : body.userID,
-      _operation: 'Add'
+      _operation: 'AddUnique'
     },
     objectID: body.classObjectID
   }).then((content) => {
