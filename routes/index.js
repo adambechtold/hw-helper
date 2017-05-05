@@ -256,7 +256,7 @@ const actions = {
         });
       }
 
-      fbActions.sendGenericMessage(senderID, classList);
+      fbActions.sendTemplateMessage(senderID, classList, 'generic');
 
       return context;
 
