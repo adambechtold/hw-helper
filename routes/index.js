@@ -271,49 +271,55 @@ const actions = {
 
   //get hw assignemnts for this student
   getHomework({context, entities}) {
-
+    let senderID = sessions[sessionId].fbid; 
     // if we have already found the user information in get name
     //    improvement: use searchUser function to find the user if you don't know who they are
     if(context.userProfile && context.userProfile.userID) {
       let index = algoClient.initIndex('test_CLASSES');
 
-      let promise = new Promise((resolve, reject) => {
         //search the database for the classes that the user is in based on userID
-        index.search(context.userProfile.userID, (err, content) => {
-          if(err) {
-            console.error('algolia search error :: getHomework');
-          } else {
-            console.log('getHomework :: search completed for: ', context.userProfile.userID);
+      index.search(context.userProfile.userID).then((content) => {
+        let hitlist = content.hits;
+        let assignmentString = '';
 
-            let hitlist = content.hits;
+        //TODO input logic for no assignments
 
-            let assignmentString = '';
+        //begin list of elements in the list. first is the header element
+        let elementList = [{
+          title : "Let's see what there is to do!",
+          image_url : 'http://i.imgur.com/l6Z1Dsy.jpg',
+        }];
 
-            for (let hit of hitlist) {
-              assignmentString += 'for: ' + hit.classID + '\n';
-              for (let assignment of hit.assignmentList) {
-                assignmentString += '  ' + assignment.description + '\n';
-              }
-            }
+        //create the rest of the elements in the list
+        for (let hit of hitlist) {
+          for (let assignment of hit.assignmentList) {
 
-            if(assignmentString) {
-              resolve(assignmentString);
-            } else {
-              console.log('FAILURE in getHomework :: ');
-              reject(Error('it broke...')); 
-            }
+            elementList.push({
+              title: hit.classID,
+              //imageurl
+              subtitle: assignment.description,
+              //input stuff regarding dates
+              // default action option
+              buttons : [
+                {
+                  title : 'Submit',
+                  type : 'web_url',
+                  url : 'http://www.northeastern.edu/scout/',
+                }
+              ]
+            });
           }
-        });
-      });
+        }
 
-      promise.then((result) => {
-        context.assignments = result;
+        fbActions.sendTemplateMessage(senderID, classList, 'list');
+
+        context.assignments = 'we just send it...';
         return context;
-      }, (err) => {
-        console.error('it broke...');
+      }).catch((err) => {
+        console.log('ALGOLIA SEARCH ERROR :: getHomework');
+        console.log(err);
+        return context;
       });
-
-      return context;
     }
 
     // default option when the user in unknown
