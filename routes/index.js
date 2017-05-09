@@ -1,11 +1,3 @@
-// Main questions for Alred:
-// - Passing variables around
-//   -- using the `sessions` variable from index.js in wit functions
-//      currently, I am thinking one way would be to extract the info I need from sessions in index.js
-//      and make functions in other files that get passed all the parameters and do the bulk of the work
-
-//      look for the ALFRED keyword to find comments that explain the issue throughout the code
-
 
 const express = require('express');
 const request = require('request');
@@ -14,11 +6,6 @@ let router = express.Router();
 const defaults = require('../data/defaults');
 
 //--------------ALGOLIA PARAMETERS-------------
-const algoliaAppID = process.env.ALGOLIA_APP_ID;
-const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
-
-// clients for each table
-var algoClient = algoliasearch(algoliaAppID, algoliaAdminAPIkey);
 
 let algoActions = require('./algoliaActions');
 
@@ -310,7 +297,7 @@ const actions = {
 // create our wit object
 const wit = new Wit({
   accessToken: witAccessToken,
-  actions,
+  actions : witActions.actions,
   logger: new log.Logger(log.INFO)
 });
 
@@ -346,7 +333,6 @@ router.post('/webhook', function (req, res) {
     res.sendStatus(200);
   }
 });
-
 
 
 // handle incoming facebook messages
