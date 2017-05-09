@@ -103,9 +103,9 @@ const actions = {
     const {sessionId, context, entities} = request;
     const {text, quickreplies} = response;
     const recipientID = sessions[sessionId].fbid;
-    // console.log('user said...', request.text);
-    // console.log('current context...', context);
-    // console.log('sending...', JSON.stringify(response));
+    console.log('user said...', request.text);
+    console.log('current context...', context);
+    console.log('sending...', JSON.stringify(response));
 
     if(response.quickreplies) {
       fbActions.sendButtonMessage(recipientID, response.text, witActions.formatQuickReplies(response.quickreplies));
