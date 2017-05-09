@@ -255,7 +255,6 @@ const actions = {
       }
 
       fbActions.sendTemplateMessage(senderID, classList, 'generic');
-
       return context;
 
     }).catch((err) => {
@@ -276,7 +275,6 @@ const actions = {
 
     // if we have already found the user information in get name
     //    improvement: use searchUser function to find the user if you don't know who they are
-
     let index = algoClient.initIndex('test_CLASSES');
 
     //search the database for the classes that the user is in based on userID
@@ -284,7 +282,7 @@ const actions = {
       let hitlist = content.hits;
       let assignmentString = '';
 
-      //TODO input logic for no assignments
+      //TODO input logic for no assignments or too many assignments
 
       //begin list of elements in the list. first is the header element
       let elementList = [{
@@ -398,7 +396,6 @@ function receivedMessage(event) {
   }
 }
 
-
 //handle messages before sending them off to be sent
 function processMessage(senderId, messageText) {
   let responseBuilder = messageText;
@@ -441,7 +438,6 @@ router.get('/webhook/', function(req, res) {
   fbActions.validateWebhook(req,res);
 });
 
-
 //handle postbacks from messenger
 function receivedPostback(event) {
   let senderID = event.sender.id;
@@ -463,17 +459,17 @@ function receivedPostback(event) {
     let school = payload.school;
     let classID = payload.classID;
     // get the user info for the the current user
-    
+
     let index = algoClient.initIndex('test_CLASSES');
 
     //complete a partial update of the class to add the user's userID if they are 
     //  not already signed up for that class
     index.partialUpdateObject({
-      studentList : {
-        value : payload.userID,
+      studentList: {
+        value: payload.userID,
         _operation: 'AddUnique'
       },
-      objectID : payload.classObjectID
+      objectID: payload.classObjectID
     }).then((content) => {
       //send confirmation message
       fbActions.sendTextMessage(senderID, "You're all signed up for " + classID + '!');
@@ -483,8 +479,12 @@ function receivedPostback(event) {
       console.log('recievedPostback ERROR :: partial update :: ', err);
     });
   }
-
 }
+
+//webhook token verifier from Facebook
+router.get('/webhook/', function(req, res) {
+  fbActions.validateWebhook(req,res);
+});
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
