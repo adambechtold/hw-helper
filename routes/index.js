@@ -1,9 +1,10 @@
 // Main questions for Alred:
-// 1) Overcoming the asynchronous problems
-//   -- abstracting algolia actions into separate files
-//   -- wit.ai misinterpretation problem (probably caused by response/update delay)
-// 2) Passing variables around
-//   -- using the sessions variable from index.
+// - Passing variables around
+//   -- using the `sessions` variable from index.js in wit functions
+//      currently, I am thinking one way would be to extract the info I need from sessions in index.js
+//      and make functions in other files that get passed all the parameters and do the bulk of the work
+
+//      look for the ALFRED keyword to find comments that explain the issue throughout the code
 
 
 const express = require('express');
@@ -33,11 +34,11 @@ let fbActions = require('./fbActions');
 //------------HELPER FUCNTIONS---------------
 var helperActions = require('./helperActions');
 
-
 // This will contain all user sessions.
 // Each session has an entry:
 // sessionId -> {fbid: facebookUserId, context: sessionState}
 var sessions = {};
+// ALFRED: this is the variable i want to use in other files
 
 const findOrCreateSession = (fbid) => {
 
@@ -121,6 +122,7 @@ const actions = {
       return context;
     }
 
+    // ALFRED: this is the way I use the sessions variable. it is in almost every wit function
     let senderID = sessions[sessionId].fbid;
 
     let index = algoClient.initIndex('test_USERS');
