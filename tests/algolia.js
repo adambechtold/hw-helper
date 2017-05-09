@@ -70,9 +70,35 @@ router.post('/algoliaSearchModTest', (req, res) => {
     console.log(result);
     res.json(result);
   }).catch((err) => {
-    console.log(err);
+    console.log('alogliaSearchModTest :: ERROR :: ',err);
     res.send('it died...');
   });
+});
+
+//test the ability to add an item to an array-based attribute
+//https://www.algolia.com/doc/api-client/ruby/indexing/#partial-update-objects
+router.post('/alogliaPartialUpdateTest', (req, res) => {
+  console.log("let's update some stuff...");
+  let body = req.body;
+
+  let index = client.initIndex('test_CLASSES');
+
+  let attributeID = body.attributeID;
+
+  index.partialUpdateObject({
+    studentList : {
+      value : body.userID,
+      _operation: 'AddUnique'
+    },
+    objectID: body.classObjectID
+  }).then((content) => {
+    console.log('Partial Update SUCCESS: ', content);
+    res.send('SUCCESS :)');
+  }).catch((err) => {
+    console.log('Partial Update FAILURE: ', err);
+    res.send('FAILURE :(');
+  });
+
 });
 
 router.post('/algolia', (req, res) => {

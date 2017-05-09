@@ -18,13 +18,13 @@ let validateWebhook = (req,res) => {
 module.exports.validateWebhook = validateWebhook;
 
 // functions to send stuff
-let sendTextMessage = (recipientId, messageText) => {
+let sendTextMessage = (recipientID, messageText) => {
 
   responseBuilder = messageText;
 
   var messageData = {
     recipient: {
-      id: recipientId
+      id: recipientID
     },
     message: {
       text: responseBuilder
@@ -36,30 +36,54 @@ let sendTextMessage = (recipientId, messageText) => {
 
 module.exports.sendTextMessage = sendTextMessage;
 
+//use the facebook api list template to send a message based on the given payload
+let sendTemplateMessage = ((recipientID, messageElements, type) => {
+  if (!(type === 'list' || type === 'generic')) {
+    let errorMessage = 'ERROR :: type must be of type "list" or "generic"';
+    console.log(errorMessage);
+    return Error(errorMessage);
+  }
 
-//send an advanced message with attachments to facebook
-let sendGenericMessage = (recipientId, messagePayload) => {
-  console.log('=-=-=-=-=-=-=-=-==- SEND ATTACHMENTS');
   let messageData = {
-    recipient: {
-      id: recipientId
+    recipient : {
+      id : recipientID
     },
-    message: {
-      attachment: {
-        type: 'template',
-        payload: {
-          template_type: 'generic',
-          elements: messagePayload
+    message : {
+      attachment : {
+        type : 'template',
+        payload : {
+          template_type : type,
+          elements : messageElements
         }
       }
     }
   };
 
   callSendAPI(messageData);
-}
+});
 
-module.exports.sendGenericMessage = sendGenericMessage;
+module.exports.sendTemplateMessage = sendTemplateMessage;
 
+let sendButtonMessage = ((recipientID, messageText, buttonList) => {
+  //TODO tests
+  callSendAPI({
+    recipient : {
+      id : recipientID
+    },
+    message : {
+      attachment : {
+        type : 'template',
+        payload : {
+          template_type : 'button',
+          text : messageText,
+          buttons : buttonList
+        }
+      }
+    }
+  });
+});
+
+module.exports.sendButtonMessage = sendButtonMessage;
 
 //facebook send message function
 function callSendAPI(messageData) {
