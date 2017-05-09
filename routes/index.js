@@ -25,6 +25,7 @@ let algoActions = require('./algoliaActions');
 const {Wit, log} = require('node-wit');
 const witEndpoint = "https://api.wit.ai/message?v=20170424&q=";
 const witAccessToken = process.env.WIT_ACCESS_TOKEN;
+const witActions = require('./witActions');
 
 //------------FACEBOOK PARAMETERS------------
 let fbActions = require('./fbActions');
@@ -99,23 +100,24 @@ router.post('/webhook', function (req, res) {
 const actions = {
   //handle wit.ai generated responses
   send(request, response) {
-    console.log('wit is sending a message');
     const {sessionId, context, entities} = request;
     const {text, quickreplies} = response;
-    const recipientId = sessions[sessionId].fbid;
-    console.log('user said...', request.text);
-    console.log('current context...', context);
-    console.log('sending...', JSON.stringify(response));
+    const recipientID = sessions[sessionId].fbid;
+    // console.log('user said...', request.text);
+    // console.log('current context...', context);
+    // console.log('sending...', JSON.stringify(response));
 
-    fbActions.sendTextMessage(recipientId, response.text);
+    if(response.quickreplies) {
+      fbActions.sendButtonMessage(recipientID, response.text, witActions.formatQuickReplies(response.quickreplies));
+    } else {
+      fbActions.sendTextMessage(recipientID, response.text);
+    }
   },
 
   // get the name of the user from the database based on their sender id
   getName({context, entities, sessionId}) {
     //see if the name is already in the context
     if(context.name) {
-      console.log('getName:: name already found');
-      console.log('getName context: ', context);
       return context;
     }
 
@@ -129,8 +131,7 @@ const actions = {
       typoTolerance: false
     });
 
-    index.search(senderID).then((content) => {
-
+    return index.search(senderID).then((content) => {
       if (content.hits.length < 1 || senderID != content.hits[0].messengerID) {
         // the user has not been found
         context.newUser = true;
@@ -147,8 +148,6 @@ const actions = {
       console.log('ALGOLIA SEARCH ERROR :: getName');
       console.error(err);
     });
-
-   return context;
   }, 
   
   //create a new user with their fbid and name
@@ -184,10 +183,9 @@ const actions = {
       messengerID: senderID,
       firstname: firstName,
       lastname: lastName,
-      school: "Northeastern University"
+      school: "All University"
     }
 
-    //TODO: create a new user running algolia
     let index = algoClient.initIndex('test_USERS');
     index.addObject(newUser, (err, content) => {
       if(err) {
@@ -221,7 +219,7 @@ const actions = {
     let userSchool = context.userProfile.school;
     let index = algoClient.initIndex('test_CLASSES');
 
-    index.search(userSchool).then((content) => {
+    return index.search(userSchool).then((content) => {
       let hitlist = content.hits;
 
       if (hitlist.length < 1) {
@@ -265,70 +263,67 @@ const actions = {
       console.log(err);
       return context;
     });
-
-    return context;
   },
 
   //get hw assignemnts for this student
-  getHomework({context, entities}) {
-    let senderID = sessions[sessionId].fbid; 
-    // if we have already found the user information in get name
-    //    improvement: use searchUser function to find the user if you don't know who they are
-    if(context.userProfile && context.userProfile.userID) {
-      let index = algoClient.initIndex('test_CLASSES');
+  getHomework({context, entities, sessionId}) {
+    let senderID = sessions[sessionId].fbid;
 
-        //search the database for the classes that the user is in based on userID
-      index.search(context.userProfile.userID).then((content) => {
-        let hitlist = content.hits;
-        let assignmentString = '';
-
-        //TODO input logic for no assignments
-
-        //begin list of elements in the list. first is the header element
-        let elementList = [{
-          title : "Let's see what there is to do!",
-          image_url : 'http://i.imgur.com/l6Z1Dsy.jpg',
-        }];
-
-        //create the rest of the elements in the list
-        for (let hit of hitlist) {
-          for (let assignment of hit.assignmentList) {
-
-            elementList.push({
-              title: hit.classID,
-              //imageurl
-              subtitle: assignment.description,
-              //input stuff regarding dates
-              // default action option
-              buttons : [
-                {
-                  title : 'Submit',
-                  type : 'web_url',
-                  url : 'http://www.northeastern.edu/scout/',
-                }
-              ]
-            });
-          }
-        }
-
-        fbActions.sendTemplateMessage(senderID, classList, 'list');
-
-        context.assignments = 'we just send it...';
-        return context;
-      }).catch((err) => {
-        console.log('ALGOLIA SEARCH ERROR :: getHomework');
-        console.log(err);
-        return context;
-      });
+     if(!context.userProfile) {
+      console.log('ERROR :: getHomework :: no User Profile available in context.');
+      return context;
     }
 
-    // default option when the user in unknown
-    context.assignments = 'mom says take out the trash';
-    
-    return context;
+    // if we have already found the user information in get name
+    //    improvement: use searchUser function to find the user if you don't know who they are
+
+    let index = algoClient.initIndex('test_CLASSES');
+
+    //search the database for the classes that the user is in based on userID
+    return index.search(context.userProfile.userID).then((content) => {
+      let hitlist = content.hits;
+      let assignmentString = '';
+
+      //TODO input logic for no assignments
+
+      //begin list of elements in the list. first is the header element
+      let elementList = [{
+        title: "Let's see what there is to do!",
+        image_url: 'http://i.imgur.com/l6Z1Dsy.jpg',
+      }];
+
+      //create the rest of the elements in the list
+      for (let hit of hitlist) {
+        for (let assignment of hit.assignmentList) {
+
+          elementList.push({
+            title: hit.classID,
+            //imageurl
+            subtitle: assignment.description,
+            //input stuff regarding dates
+            // default action option
+            buttons: [
+              {
+                title: 'Submit',
+                type: 'web_url',
+                url: 'http://www.northeastern.edu/scout/',
+              }
+            ]
+          });
+        }
+      }
+
+      fbActions.sendTemplateMessage(senderID, elementList, 'list');
+
+      context.assignments = 'complete';
+      return context;
+    }).catch((err) => {
+      console.log('ALGOLIA SEARCH ERROR :: getHomework');
+      console.log(err);
+      return context;
+    });
   }
 };
-
 
 // create our wit object
 const wit = new Wit({
@@ -336,6 +331,40 @@ const wit = new Wit({
   actions,
   logger: new log.Logger(log.INFO)
 });
+
+// handle new events to the webhook
+router.post('/webhook', function (req, res) {
+  var data = req.body;
+
+  // Make sure this is a page subscription
+  if (data.object === 'page') {
+
+    // Iterate over each entry - there may be multiple if batched
+    data.entry.forEach(function(entry) {
+      var pageID = entry.id;
+      var timeOfEvent = entry.time;
+
+      // Iterate over each messaging event
+      entry.messaging.forEach(function(event) {
+        if (event.message) {
+          receivedMessage(event);
+        } else if (event.delivery) {
+           console.log('Message delivered to id: ', event.sender.id);
+        } else if (event.postback) {
+          receivedPostback(event);
+        } else if (event.read) {
+           //user read your message. do nothing
+        } else {
+          console.log("Webhook received unknown event: ", event);
+        }
+      });
+    });
+
+    // Assume all went well.
+    res.sendStatus(200);
+  }
+});
+
 
 
 // handle incoming facebook messages
@@ -456,7 +485,6 @@ function receivedPostback(event) {
   }
 
 }
-
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

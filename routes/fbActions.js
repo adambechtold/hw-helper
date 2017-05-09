@@ -18,13 +18,13 @@ let validateWebhook = (req,res) => {
 module.exports.validateWebhook = validateWebhook;
 
 // functions to send stuff
-let sendTextMessage = (recipientId, messageText) => {
+let sendTextMessage = (recipientID, messageText) => {
 
   responseBuilder = messageText;
 
   var messageData = {
     recipient: {
-      id: recipientId
+      id: recipientID
     },
     message: {
       text: responseBuilder
@@ -63,6 +63,27 @@ let sendTemplateMessage = ((recipientID, messageElements, type) => {
 });
 
 module.exports.sendTemplateMessage = sendTemplateMessage;
+
+let sendButtonMessage = ((recipientID, messageText, buttonList) => {
+  //TODO tests
+  callSendAPI({
+    recipient : {
+      id : recipientID
+    },
+    message : {
+      attachment : {
+        type : 'template',
+        payload : {
+          template_type : 'button',
+          text : messageText,
+          buttons : buttonList
+        }
+      }
+    }
+  });
+});
+
+module.exports.sendButtonMessage = sendButtonMessage;
 
 //facebook send message function
 function callSendAPI(messageData) {
