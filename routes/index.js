@@ -23,7 +23,7 @@ var helperActions = require('../lib/helperActions');
 // This will contain all user sessions.
 // Each session has an entry:
 // sessionId -> {fbid: facebookUserId, context: sessionState}
-let {sessions, findOrCreateSession} = require('../lib/sessions.js');
+let {sessions, findOrCreateSession, deleteSession} = require('../lib/sessions.js');
 // ALFRED: this is the variable i want to use in other files
 
 //=========================================================
@@ -157,13 +157,11 @@ function processMessage(senderId, messageText) {
     sessions[sessionId].context
     ).then((context) => {
       // bot has completed all its actions
-      console.log('Waiting for the next user messsage');
 
-      //TODO implement some logic to end the user's session
-
+      deleteSession(sessionId);
 
       //update the user's current session state
-      sessions[sessionId].context = context;
+      //sessions[sessionId].context = context;
     })
     .catch((err) => {
       console.log(sessionId);
