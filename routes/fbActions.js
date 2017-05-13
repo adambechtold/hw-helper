@@ -15,7 +15,6 @@ let validateWebhook = (req,res) => {
   }
 }
 
-module.exports.validateWebhook = validateWebhook;
 
 // functions to send stuff
 let sendTextMessage = (recipientID, messageText) => {
@@ -34,7 +33,6 @@ let sendTextMessage = (recipientID, messageText) => {
   callSendAPI(messageData);
 }
 
-module.exports.sendTextMessage = sendTextMessage;
 
 //use the facebook api list template to send a message based on the given payload
 let sendTemplateMessage = ((recipientID, messageElements, type) => {
@@ -62,7 +60,6 @@ let sendTemplateMessage = ((recipientID, messageElements, type) => {
   callSendAPI(messageData);
 });
 
-module.exports.sendTemplateMessage = sendTemplateMessage;
 
 let sendButtonMessage = ((recipientID, messageText, buttonList) => {
   //TODO tests
@@ -83,7 +80,6 @@ let sendButtonMessage = ((recipientID, messageText, buttonList) => {
   });
 });
 
-module.exports.sendButtonMessage = sendButtonMessage;
 
 //facebook send message function
 function callSendAPI(messageData) {
@@ -106,4 +102,11 @@ function callSendAPI(messageData) {
       console.error(error);
     }
   });
+}
+
+module.exports = {
+  sendButtonMessage,
+  validateWebhook,
+  sendTemplateMessage,
+  sendTextMessage
 }

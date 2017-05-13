@@ -20,7 +20,10 @@ let formatQuickReplies = ((quickreplies) => {
     buttonArray.push({
       type : 'postback',
       title : choice,
-      payload : 'quickReply|' + choice
+      payload : JSON.stringify({
+        type : 'quickReply',
+        message : choice
+      })
     })
   }
   return buttonArray;
@@ -175,12 +178,14 @@ const actions = {
           {
             type: 'postback',
             title: 'Sign me up!',
-            payload: '{ "type" : "classSignup", \
-                "school" : "' + hit.school + '", \
-                "classID" : "' + hit.classID + '", \
-                "senderID" : "' + senderID + '", \
-                "userID" : "' + context.userProfile.userID + '", \
-                "classObjectID" : "' + hit.objectID + '" } '
+            payload: JSON.stringify({
+              type : 'classSignup',
+              school : hit.school,
+              classID : hit.classID,
+              senderID : senderID,
+              userID : context.userProfile.userID,
+              classObjectID : hit.objectID
+            })
           }]
         });
       }

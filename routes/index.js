@@ -188,7 +188,22 @@ function receivedPostback(event) {
   payload = JSON.parse(payload);
   let payloadType = payload.type;
 
-  if (payloadType === 'classSignup') {
+  //send 'quickReply' messages from buttons to wit for interpretation. i.e. treat them
+  // as a normal user message
+  if (payloadType === 'quickReply') {
+    let userMessage = payload.message;
+
+    //convert the postback event to a message event
+    delete event.payload;
+    event.message = {
+      messageid : null,
+      text : userMessage
+    }
+
+    receivedMessage(event);
+  }
+
+  else if (payloadType === 'classSignup') {
     //this is a message to signup the current user to a certain class
     let school = payload.school;
     let classID = payload.classID;
