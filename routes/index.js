@@ -6,19 +6,19 @@ let router = express.Router();
 const defaults = require('../data/defaults');
 
 //--------------ALGOLIA PARAMETERS-------------
-let algoActions = require('./algoliaActions');
+let algoActions = require('../lib/algoliaActions');
 
 //--------------WIT.AI PARAMETERS--------------
 const {Wit, log} = require('node-wit');
 const witEndpoint = "https://api.wit.ai/message?v=20170424&q=";
 const witAccessToken = process.env.WIT_ACCESS_TOKEN;
-const witActions = require('./witActions');
+const witActions = require('../lib/witActions');
 
 //------------FACEBOOK PARAMETERS------------
-let fbActions = require('./fbActions');
+let fbActions = require('../lib/fbActions');
 
 //------------HELPER FUCNTIONS---------------
-var helperActions = require('./helperActions');
+var helperActions = require('../lib/helperActions');
 
 // This will contain all user sessions.
 // Each session has an entry:

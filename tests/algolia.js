@@ -2,7 +2,7 @@ var express = require('express');
 var request = require('request');
 var algoliasearch = require('algoliasearch');
 var router = express.Router();
-var algoliaActions = require('../routes/algoliaActions');
+var algoliaActions = require('../lib/algoliaActions');
 
 const algoliaAppID = process.env.ALGOLIA_APP_ID;
 const algoliaAdminAPIkey = process.env.ALGOLIA_ADMIN_KEY;
