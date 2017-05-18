@@ -8,44 +8,6 @@ let {validateWebhook} = require('../lib/fbActions');
 let {receivedMessage, receivedPostback} = require('../lib/messageProcessing');
 
 
-//=========================================================
-// handle new events to the webhook
-router.post('/webhook', function (req, res) {
-  let data = req.body;
-
-  // Make sure this is a page subscription
-  if (data.object === 'page') {
-
-    // Iterate over each entry - there may be multiple if batched
-    data.entry.forEach(function(entry) {
-      let pageID = entry.id;
-      let timeOfEvent = entry.time;
-
-      // Iterate over each messaging event
-      entry.messaging.forEach(function(event) {
-        if (event.message) {
-          receivedMessage(event);
-        } else if (event.delivery) {
-           console.log('Message delivered to id: ', event.sender.id);
-        } else if (event.postback) {
-          receivedPostback(event);
-        } else if (event.read) {
-           //user read your message. do nothing
-        } else {
-          console.log("Webhook received unknown event: ", event);
-        }
-      });
-    });
-
-    // Assume all went well.
-    //
-    // You must send back a 200, within 20 seconds, to let us know
-    // you've successfully received the callback. Otherwise, the request
-    // will time out and we will keep trying to resend.
-    res.sendStatus(200);
-  }
-});
-
 // handle new facebook events to the webhook
 router.post('/webhook', (req, res) => {
   let data = req.body;
