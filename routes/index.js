@@ -24,10 +24,10 @@ router.post('/webhook', (req, res) => {
       entry.messaging.forEach(function(event) {
         if (event.message) {
           receivedMessage(event);
-        } else if (event.delivery) {
-           console.log('Message delivered to id: ', event.sender.id);
         } else if (event.postback) {
           receivedPostback(event);
+        } else if (event.delivery) {
+           //message delivered to user. do nothing
         } else if (event.read) {
            //user read your message. do nothing
         } else {
