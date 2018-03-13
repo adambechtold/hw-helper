@@ -8,24 +8,10 @@ var data = [1, 2, 3, 4];
 router.post('/test', (req, res) => {
   //add some data to the array
   console.log('post request');
-
   console.log(req);
 
-
   query = req.body.query;
-
-  // callWithWitAi(query, function(err, intent) {
-  //   handleIntent()
-  // });
-
   res.json(query);
-
-
-  // var val = req.body.value;
-  // console.log(req.body.value);
-  //
-  // data.push(val);
-  // res.json( data );
 });
 
 const serverAccessToken = 'SPFJO6E643KP63WHBED4KHVD2YY6RCJW';
